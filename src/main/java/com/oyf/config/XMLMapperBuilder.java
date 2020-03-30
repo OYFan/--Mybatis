@@ -22,7 +22,18 @@ public class XMLMapperBuilder {
         Element mapperRootElement = mapperDocument.getRootElement();
         String namespace = mapperRootElement.attributeValue("namespace");
         List<Element> selectNodes = mapperDocument.selectNodes("//select");
-        for (Element ele : selectNodes) {
+        List<Element> insertNodes = mapperDocument.selectNodes("//insert");
+        List<Element> updateNodes = mapperDocument.selectNodes("//update");
+        List<Element> deleteNodes = mapperDocument.selectNodes("//delete");
+        putMappedStatement(configuration,selectNodes,namespace,"select");
+        putMappedStatement(configuration,insertNodes,namespace,"insert");
+        putMappedStatement(configuration,updateNodes,namespace,"update");
+        putMappedStatement(configuration,deleteNodes,namespace,"delete");
+
+    }
+
+    private void putMappedStatement(Configuration configuration,List<Element> nodes,String namespace,String executeType){
+        for (Element ele : nodes) {
             MappedStatement mappedStatement = new MappedStatement();
             String id = ele.attributeValue("id");
             String resultType = ele.attributeValue("resultType");
@@ -32,7 +43,8 @@ public class XMLMapperBuilder {
             mappedStatement.setParamterType(paramterType);
             mappedStatement.setResultType(resultType);
             mappedStatement.setSql(sqlText);
-            this.configuration.getMappedStatementMap().put(namespace + "." + id,mappedStatement);
+            mappedStatement.setExecuteType(executeType);
+            configuration.getMappedStatementMap().put(namespace + "." + id,mappedStatement);
         }
     }
 }

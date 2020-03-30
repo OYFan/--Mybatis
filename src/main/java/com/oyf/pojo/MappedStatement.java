@@ -9,6 +9,15 @@ public class MappedStatement {
 
     private String sql;
 
+    private String executeType;
+
+    public String getExecuteType() {
+        return executeType;
+    }
+
+    public void setExecuteType(String executeType) {
+        this.executeType = executeType;
+    }
 
     public String getId() {
         return id;

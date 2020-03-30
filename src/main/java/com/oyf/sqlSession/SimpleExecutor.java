@@ -56,6 +56,78 @@ public class SimpleExecutor implements Executor {
         return (List<T>) list;
     }
 
+    @Override
+    public Integer insert(Configuration configuration, MappedStatement mappedStatement, Object... param) throws Exception {
+        Connection connection = configuration.getDataSource().getConnection();
+
+        String sqlText= mappedStatement.getSql();
+        BoundSql boundSql = getBoundSql(sqlText);
+        String sql = boundSql.getSql();
+        List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+        sql = sql.trim();
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        String paramterType = mappedStatement.getParamterType();
+        Class<?> parameterClass = getClasss(paramterType);
+        for (int i = 0; i < parameterMappings.size(); i++) {
+            ParameterMapping parameterMapping = parameterMappings.get(i);
+            String content = parameterMapping.getContent();
+            Field field = parameterClass.getDeclaredField(content);
+            field.setAccessible(true);
+            Object o = field.get(param[0]);
+            preparedStatement.setObject(i+1,o);
+        }
+        int executeUpdate = preparedStatement.executeUpdate();
+        return executeUpdate;
+    }
+
+    @Override
+    public Integer update(Configuration configuration, MappedStatement mappedStatement, Object... param) throws Exception {
+        Connection connection = configuration.getDataSource().getConnection();
+
+        String sqlText= mappedStatement.getSql();
+        BoundSql boundSql = getBoundSql(sqlText);
+        String sql = boundSql.getSql();
+        List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+        sql = sql.trim();
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        String paramterType = mappedStatement.getParamterType();
+        Class<?> parameterClass = getClasss(paramterType);
+        for (int i = 0; i < parameterMappings.size(); i++) {
+            ParameterMapping parameterMapping = parameterMappings.get(i);
+            String content = parameterMapping.getContent();
+            Field field = parameterClass.getDeclaredField(content);
+            field.setAccessible(true);
+            Object o = field.get(param[0]);
+            preparedStatement.setObject(i+1,o);
+        }
+        int rows = preparedStatement.executeUpdate();
+        return rows;
+    }
+
+    @Override
+    public Integer delete(Configuration configuration, MappedStatement mappedStatement, Object... param) throws Exception {
+        Connection connection = configuration.getDataSource().getConnection();
+
+        String sqlText= mappedStatement.getSql();
+        BoundSql boundSql = getBoundSql(sqlText);
+        String sql = boundSql.getSql();
+        List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+        sql = sql.trim();
+        PreparedStatement preparedStatement = connection.prepareStatement(sql);
+        String paramterType = mappedStatement.getParamterType();
+        Class<?> parameterClass = getClasss(paramterType);
+        for (int i = 0; i < parameterMappings.size(); i++) {
+            ParameterMapping parameterMapping = parameterMappings.get(i);
+            String content = parameterMapping.getContent();
+            Field field = parameterClass.getDeclaredField(content);
+            field.setAccessible(true);
+            Object o = field.get(param[0]);
+            preparedStatement.setObject(i+1,o);
+        }
+        int executeUpdate = preparedStatement.executeUpdate();
+        return executeUpdate;
+    }
+
     private Class<?> getClasss(String path) throws ClassNotFoundException {
         if (path == null || "".equals(path)){
             return null;

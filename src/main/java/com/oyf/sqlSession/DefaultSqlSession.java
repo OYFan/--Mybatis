@@ -38,6 +38,47 @@ public class DefaultSqlSession implements SqlSession{
     }
 
     @Override
+    public Integer insert(String statementId, Object... params) throws Exception {
+        SimpleExecutor simpleExecutor = new SimpleExecutor();
+        Map<String, MappedStatement> mappedStatementMap = configuration.getMappedStatementMap();
+        MappedStatement mappedStatement = mappedStatementMap.get(statementId);
+        Integer rows = simpleExecutor.update(configuration, mappedStatement, params);
+        return rows;
+    }
+
+    @Override
+    public Integer update(String statementId, Object... params) throws Exception {
+        SimpleExecutor simpleExecutor = new SimpleExecutor();
+        Map<String, MappedStatement> mappedStatementMap = configuration.getMappedStatementMap();
+        MappedStatement mappedStatement = mappedStatementMap.get(statementId);
+        Integer rows = simpleExecutor.update(configuration, mappedStatement, params);
+        return rows;
+    }
+
+    @Override
+    public Integer delete(String statementId, Object... params) throws Exception {
+        SimpleExecutor simpleExecutor = new SimpleExecutor();
+        Map<String, MappedStatement> mappedStatementMap = configuration.getMappedStatementMap();
+        MappedStatement mappedStatement = mappedStatementMap.get(statementId);
+        Integer rows  = simpleExecutor.delete(configuration, mappedStatement, params);
+        return rows;
+    }
+
+    public Integer dispatch(String statementId, Object... params) throws Exception{
+        Map<String, MappedStatement> mappedStatementMap = configuration.getMappedStatementMap();
+        MappedStatement mappedStatement = mappedStatementMap.get(statementId);
+        String executeType = mappedStatement.getExecuteType();
+        if ("insert".equals(executeType)) {
+            return insert(statementId,params);
+        }else if ("update".equals(executeType)){
+            return update(statementId,params);
+        }else if ("delete".equals(executeType)){
+            return delete(statementId,params);
+        }
+        return null;
+    }
+
+    @Override
     public <T> T getMapperClass(Class<?> mapperClass){
         Object proxyInstance = Proxy.newProxyInstance(DefaultSqlSession.class.getClassLoader(), new Class[]{mapperClass}, new InvocationHandler() {
             @Override
@@ -49,6 +90,8 @@ public class DefaultSqlSession implements SqlSession{
                 if (methodGenericReturnType instanceof ParameterizedType){
                     List<Object> objects = selectList(statementId, args);
                     return objects;
+                }else if(method.getReturnType() == Integer.class){//返回值为Integer则调用增删改操作
+                    return dispatch(statementId,args);
                 }
                 return selectOne(statementId,args);
             }
